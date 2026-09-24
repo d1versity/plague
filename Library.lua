@@ -1,4 +1,4 @@
--- plague by Vhyse | v1
+-- plague by Vhyse | v1.1
 
 local Plague = {
     Flags = {},
@@ -33,7 +33,7 @@ local Theme = {
     Text = Color3.fromRGB(160, 160, 170),
     SubText = Color3.fromRGB(130, 130, 140),
     Border = Color3.fromRGB(35, 35, 40),
-    Font = Enum.Font.GothamMedium -- Thicker, more readable font
+    Font = Enum.Font.GothamMedium
 }
 
 local fastTween = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
@@ -44,8 +44,8 @@ local function Tween(instance, properties)
 end
 
 function Plague:CreateWindow(config)
-    local titleText = config.Title or "Plague"
-    local configFolder = config.ConfigFolder or "PlagueConfigs"
+    local titleText = config.Title or "plague"
+    local configFolder = config.ConfigFolder or "plague_configs"
     
     if not isfolder(configFolder) then
         makefolder(configFolder)
@@ -178,7 +178,6 @@ function Plague:CreateWindow(config)
         end
     end))
 
-    -- UI Toggle Listener (Ignores input if currently binding a key)
     table.insert(Plague.Connections, UserInputService.InputBegan:Connect(function(input, gpe)
         if gpe or Plague.IsBinding then return end
         
@@ -282,7 +281,7 @@ function Plague:CreateWindow(config)
         TabBtn.Font = Theme.Font
         TabBtn.TextSize = 13
         TabBtn.Selectable = false
-        TabBtn.LayoutOrder = (name == "settings") and 9999 or 0 -- Forces settings tab to always be last
+        TabBtn.LayoutOrder = (name == "settings") and 9999 or 0 
         TabBtn.Parent = TabContainer
 
         local TabPad = Instance.new("UIPadding", TabBtn)
@@ -782,7 +781,7 @@ function Plague:CreateWindow(config)
                 BindBtn.Position = UDim2.new(1, -70, 0.5, -10)
                 BindBtn.BackgroundColor3 = Theme.Element
                 BindBtn.BorderSizePixel = 0
-                BindBtn.Text = key == Enum.KeyCode.Unknown and "None" or key.Name
+                BindBtn.Text = key == Enum.KeyCode.Unknown and "none" or string.lower(key.Name)
                 BindBtn.TextColor3 = Theme.Accent
                 BindBtn.Font = Theme.Font
                 BindBtn.TextSize = 11
@@ -811,12 +810,9 @@ function Plague:CreateWindow(config)
                         if newKey then
                             key = newKey
                             Plague.Flags[flag] = key
-                            BindBtn.Text = key.Name
+                            BindBtn.Text = string.lower(key.Name)
                             binding = false
-                            
-                            -- Delays resetting the binding state so global functions don't immediately trigger
                             task.delay(0.1, function() Plague.IsBinding = false end)
-                            
                             if callback then task.spawn(callback, key) end
                         end
                     else
@@ -830,7 +826,7 @@ function Plague:CreateWindow(config)
                     Set = function(self, newKey)
                         key = newKey
                         Plague.Flags[flag] = key
-                        BindBtn.Text = key == Enum.KeyCode.Unknown and "None" or key.Name
+                        BindBtn.Text = key == Enum.KeyCode.Unknown and "none" or string.lower(key.Name)
                     end
                 }
             end
@@ -877,24 +873,150 @@ function Plague:CreateWindow(config)
                 }
             end
 
+            -- Color Palette Grid
+            function Elements:CreateColorPicker(flag, name, default, callback)
+                local color = default or Color3.fromRGB(255, 255, 255)
+                local tempColor = color
+                Plague.Flags[flag] = color
+
+                local CPFrame = Instance.new("Frame")
+                CPFrame.Size = UDim2.new(1, 0, 0, 30)
+                CPFrame.BackgroundTransparency = 1
+                CPFrame.ClipsDescendants = true
+                CPFrame.BorderSizePixel = 0
+                CPFrame.Parent = SecContainer
+
+                local Title = Instance.new("TextLabel")
+                Title.Size = UDim2.new(1, -40, 0, 20)
+                Title.Position = UDim2.new(0, 0, 0, 5)
+                Title.BackgroundTransparency = 1
+                Title.BorderSizePixel = 0
+                Title.Text = name
+                Title.TextColor3 = Theme.Text
+                Title.Font = Theme.Font
+                Title.TextSize = 12
+                Title.TextXAlignment = Enum.TextXAlignment.Left
+                Title.Parent = CPFrame
+
+                local PreviewBtn = Instance.new("TextButton")
+                PreviewBtn.Size = UDim2.new(0, 30, 0, 18)
+                PreviewBtn.Position = UDim2.new(1, -30, 0, 6)
+                PreviewBtn.BackgroundColor3 = color
+                PreviewBtn.Text = ""
+                PreviewBtn.AutoButtonColor = false
+                PreviewBtn.Selectable = false
+                PreviewBtn.Parent = CPFrame
+                Instance.new("UICorner", PreviewBtn).CornerRadius = UDim.new(0, 4)
+                Instance.new("UIStroke", PreviewBtn).Color = Theme.Border
+
+                local PaletteContainer = Instance.new("Frame")
+                PaletteContainer.Size = UDim2.new(1, 0, 0, 0)
+                PaletteContainer.Position = UDim2.new(0, 0, 0, 30)
+                PaletteContainer.BackgroundTransparency = 1
+                PaletteContainer.BorderSizePixel = 0
+                PaletteContainer.ClipsDescendants = true
+                PaletteContainer.Parent = CPFrame
+
+                local GridFrame = Instance.new("Frame")
+                GridFrame.Size = UDim2.new(1, 0, 0, 110)
+                GridFrame.BackgroundTransparency = 1
+                GridFrame.BorderSizePixel = 0
+                GridFrame.Parent = PaletteContainer
+
+                local Grid = Instance.new("UIGridLayout")
+                Grid.CellSize = UDim2.new(0, 20, 0, 20)
+                Grid.CellPadding = UDim2.new(0, 5, 0, 5)
+                Grid.HorizontalAlignment = Enum.HorizontalAlignment.Center
+                Grid.SortOrder = Enum.SortOrder.LayoutOrder
+                Grid.Parent = GridFrame
+
+                local colors = {
+                    Color3.fromRGB(255, 255, 255), Color3.fromRGB(170, 170, 170), Color3.fromRGB(85, 85, 85), Color3.fromRGB(16, 16, 18),
+                    Color3.fromRGB(255, 80, 80), Color3.fromRGB(255, 140, 60), Color3.fromRGB(255, 220, 80), Color3.fromRGB(100, 255, 100),
+                    Color3.fromRGB(80, 220, 255), Color3.fromRGB(80, 100, 255), Color3.fromRGB(150, 80, 255), Color3.fromRGB(220, 80, 255),
+                    Color3.fromRGB(255, 105, 180), Color3.fromRGB(155, 95, 135), Color3.fromRGB(0, 150, 150), Color3.fromRGB(180, 255, 80)
+                }
+
+                for _, c in ipairs(colors) do
+                    local cBtn = Instance.new("TextButton")
+                    cBtn.BackgroundColor3 = c
+                    cBtn.Text = ""
+                    cBtn.Parent = GridFrame
+                    Instance.new("UICorner", cBtn).CornerRadius = UDim.new(0, 4)
+                    Instance.new("UIStroke", cBtn).Color = Theme.Border
+
+                    cBtn.MouseButton1Click:Connect(function()
+                        tempColor = c
+                        Tween(PreviewBtn, {BackgroundColor3 = tempColor})
+                    end)
+                end
+
+                local SaveBtn = Instance.new("TextButton")
+                SaveBtn.Size = UDim2.new(1, 0, 0, 24)
+                SaveBtn.Position = UDim2.new(0, 0, 0, 106)
+                SaveBtn.BackgroundColor3 = Theme.Element
+                SaveBtn.Text = "save color"
+                SaveBtn.TextColor3 = Theme.Accent
+                SaveBtn.Font = Theme.Font
+                SaveBtn.TextSize = 11
+                SaveBtn.AutoButtonColor = false
+                SaveBtn.Selectable = false
+                SaveBtn.Parent = PaletteContainer
+                Instance.new("UICorner", SaveBtn).CornerRadius = UDim.new(0, 4)
+                Instance.new("UIStroke", SaveBtn).Color = Theme.Border
+
+                local dropped = false
+                PreviewBtn.MouseButton1Click:Connect(function()
+                    dropped = not dropped
+                    if dropped then
+                        tempColor = color 
+                        Tween(PreviewBtn, {BackgroundColor3 = tempColor})
+                        Tween(PaletteContainer, {Size = UDim2.new(1, 0, 0, 136)})
+                        Tween(CPFrame, {Size = UDim2.new(1, 0, 0, 166)})
+                    else
+                        Tween(PreviewBtn, {BackgroundColor3 = color})
+                        Tween(PaletteContainer, {Size = UDim2.new(1, 0, 0, 0)})
+                        Tween(CPFrame, {Size = UDim2.new(1, 0, 0, 30)})
+                    end
+                end)
+
+                SaveBtn.MouseButton1Click:Connect(function()
+                    color = tempColor
+                    Plague.Flags[flag] = color
+                    dropped = false
+                    Tween(PaletteContainer, {Size = UDim2.new(1, 0, 0, 0)})
+                    Tween(CPFrame, {Size = UDim2.new(1, 0, 0, 30)})
+                    if callback then task.spawn(callback, color) end
+                end)
+
+                return {
+                    Set = function(self, val)
+                        color = val
+                        tempColor = val
+                        Plague.Flags[flag] = color
+                        Tween(PreviewBtn, {BackgroundColor3 = color})
+                        if callback then task.spawn(callback, color) end
+                    end
+                }
+            end
+
             return Elements
         end
         return TabObj
     end
 
-    -- Mandatory Settings Tab (Automatically sorted to the end)
     local SettingsTab = WindowObj:CreateTab("settings")
-    local GeneralSec = SettingsTab:CreateSection("General", "Left")
+    local GeneralSec = SettingsTab:CreateSection("general", "Left")
     
-    GeneralSec:CreateKeybind("UIToggleKey", "UI Toggle Key", Plague.ToggleKey, function(key)
+    GeneralSec:CreateKeybind("uitogglekey", "ui toggle key", Plague.ToggleKey, function(key)
         Plague.ToggleKey = key
     end)
 
-    local ConfigSec = SettingsTab:CreateSection("Configuration", "Right")
-    local cfgDropdown = ConfigSec:CreateDropdown("SelectedConfig", "Config File", {"Default"}, "Default")
+    local ConfigSec = SettingsTab:CreateSection("configuration", "Right")
+    local cfgDropdown = ConfigSec:CreateDropdown("selectedconfig", "config file", {"default"}, "default")
     
     local function refreshConfigs()
-        local files = {"Default"}
+        local files = {"default"}
         if isfolder(configFolder) then
             for _, file in pairs(listfiles(configFolder)) do
                 if file:match("%.json$") then
@@ -906,43 +1028,49 @@ function Plague:CreateWindow(config)
     end
     refreshConfigs()
 
-    ConfigSec:CreateButton("Save Config", function()
-        local cfgName = Plague.Flags["SelectedConfig"] or "Default"
+    ConfigSec:CreateButton("save config", function()
+        local cfgName = Plague.Flags["selectedconfig"] or "default"
         local path = configFolder .. "/" .. cfgName .. ".json"
         
         local saveTable = {}
         for k, v in pairs(Plague.Flags) do
             if typeof(v) == "EnumItem" then
                 saveTable[k] = {Type = "Enum", Value = v.Name}
+            elseif typeof(v) == "Color3" then
+                saveTable[k] = {Type = "Color3", R = v.R, G = v.G, B = v.B}
             else
                 saveTable[k] = v
             end
         end
         
         writefile(path, HttpService:JSONEncode(saveTable))
-        Plague:Notify("Config Saved", "Saved data to " .. cfgName, 3)
+        Plague:Notify("config saved", "saved data to " .. cfgName, 3)
         refreshConfigs()
     end)
 
-    ConfigSec:CreateButton("Load Config", function()
-        local cfgName = Plague.Flags["SelectedConfig"] or "Default"
+    ConfigSec:CreateButton("load config", function()
+        local cfgName = Plague.Flags["selectedconfig"] or "default"
         local path = configFolder .. "/" .. cfgName .. ".json"
         if isfile(path) then
             local success, data = pcall(function() return HttpService:JSONDecode(readfile(path)) end)
             if success and data then
                 for k, v in pairs(data) do
-                    if type(v) == "table" and v.Type == "Enum" then
-                        Plague.Flags[k] = Enum.KeyCode[v.Value] or Enum.UserInputType[v.Value]
+                    if type(v) == "table" then
+                        if v.Type == "Enum" then
+                            Plague.Flags[k] = Enum.KeyCode[v.Value] or Enum.UserInputType[v.Value]
+                        elseif v.Type == "Color3" then
+                            Plague.Flags[k] = Color3.new(v.R, v.G, v.B)
+                        end
                     else
                         Plague.Flags[k] = v
                     end
                 end
-                Plague:Notify("Config Loaded", "Loaded data from " .. cfgName, 3)
+                Plague:Notify("config loaded", "loaded data from " .. cfgName, 3)
             else
-                Plague:Notify("Error", "Failed to parse config.", 3)
+                Plague:Notify("error", "failed to parse config.", 3)
             end
         else
-            Plague:Notify("Error", "Config file not found.", 3)
+            Plague:Notify("error", "config file not found.", 3)
         end
     end)
 
