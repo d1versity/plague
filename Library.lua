@@ -1,4 +1,4 @@
--- plague by Vhyse | v1.2
+-- plague by Vhyse | v1.3
 
 local Plague = {
     Flags = {},
@@ -33,7 +33,7 @@ local Theme = {
     Text = Color3.fromRGB(160, 160, 170),
     SubText = Color3.fromRGB(130, 130, 140),
     Border = Color3.fromRGB(35, 35, 40),
-    Font = Enum.Font.GothamBold -- Upgraded to Bold to completely eliminate CanvasGroup text blur
+    Font = Enum.Font.GothamBold
 }
 
 local fastTween = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
@@ -466,20 +466,20 @@ function Plague:CreateWindow(config)
                 BoxStroke.Parent = OuterBox
 
                 local InnerBox = Instance.new("Frame")
-                InnerBox.Size = state and UDim2.new(1, -4, 1, -4) or UDim2.new(0, 0, 0, 0)
+                InnerBox.Size = state and UDim2.new(1, 0, 1, 0) or UDim2.new(0, 0, 0, 0)
                 InnerBox.Position = UDim2.new(0.5, 0, 0.5, 0)
                 InnerBox.AnchorPoint = Vector2.new(0.5, 0.5)
                 InnerBox.BackgroundColor3 = Theme.Accent
                 InnerBox.BackgroundTransparency = state and 0 or 1
                 InnerBox.BorderSizePixel = 0
                 InnerBox.Parent = OuterBox
-                Instance.new("UICorner", InnerBox).CornerRadius = UDim.new(0, 2)
+                Instance.new("UICorner", InnerBox).CornerRadius = UDim.new(0, 4)
 
                 local function trigger(forceState)
                     if forceState ~= nil then state = forceState else state = not state end
                     Plague.Flags[flag] = state
                     Tween(InnerBox, {
-                        Size = state and UDim2.new(1, -4, 1, -4) or UDim2.new(0,0,0,0),
+                        Size = state and UDim2.new(1, 0, 1, 0) or UDim2.new(0,0,0,0),
                         BackgroundTransparency = state and 0 or 1
                     })
                     Tween(BoxStroke, {Color = state and Theme.Accent or Theme.Border})
@@ -873,7 +873,6 @@ function Plague:CreateWindow(config)
                 }
             end
 
-            -- Color Picker Element
             function Elements:CreateColorPicker(flag, name, default, callback)
                 local color = default or Color3.fromRGB(255, 255, 255)
                 Plague.Flags[flag] = color
@@ -946,7 +945,6 @@ function Plague:CreateWindow(config)
                     Instance.new("UICorner", cBtn).CornerRadius = UDim.new(0, 4)
                     Instance.new("UIStroke", cBtn).Color = Theme.Border
 
-                    -- Instantly sets color and closes picker
                     cBtn.MouseButton1Click:Connect(function()
                         color = c
                         Plague.Flags[flag] = color
