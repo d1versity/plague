@@ -1,4 +1,4 @@
--- plague by Vhyse | v1.1
+-- plague by Vhyse | v1.2
 
 local Plague = {
     Flags = {},
@@ -33,7 +33,7 @@ local Theme = {
     Text = Color3.fromRGB(160, 160, 170),
     SubText = Color3.fromRGB(130, 130, 140),
     Border = Color3.fromRGB(35, 35, 40),
-    Font = Enum.Font.GothamMedium
+    Font = Enum.Font.GothamBold -- Upgraded to Bold to completely eliminate CanvasGroup text blur
 }
 
 local fastTween = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
@@ -873,10 +873,9 @@ function Plague:CreateWindow(config)
                 }
             end
 
-            -- Color Palette Grid
+            -- Color Picker Element
             function Elements:CreateColorPicker(flag, name, default, callback)
                 local color = default or Color3.fromRGB(255, 255, 255)
-                local tempColor = color
                 Plague.Flags[flag] = color
 
                 local CPFrame = Instance.new("Frame")
@@ -937,6 +936,8 @@ function Plague:CreateWindow(config)
                     Color3.fromRGB(255, 105, 180), Color3.fromRGB(155, 95, 135), Color3.fromRGB(0, 150, 150), Color3.fromRGB(180, 255, 80)
                 }
 
+                local dropped = false
+
                 for _, c in ipairs(colors) do
                     local cBtn = Instance.new("TextButton")
                     cBtn.BackgroundColor3 = c
@@ -945,54 +946,32 @@ function Plague:CreateWindow(config)
                     Instance.new("UICorner", cBtn).CornerRadius = UDim.new(0, 4)
                     Instance.new("UIStroke", cBtn).Color = Theme.Border
 
+                    -- Instantly sets color and closes picker
                     cBtn.MouseButton1Click:Connect(function()
-                        tempColor = c
-                        Tween(PreviewBtn, {BackgroundColor3 = tempColor})
+                        color = c
+                        Plague.Flags[flag] = color
+                        Tween(PreviewBtn, {BackgroundColor3 = color})
+                        dropped = false
+                        Tween(PaletteContainer, {Size = UDim2.new(1, 0, 0, 0)})
+                        Tween(CPFrame, {Size = UDim2.new(1, 0, 0, 30)})
+                        if callback then task.spawn(callback, color) end
                     end)
                 end
 
-                local SaveBtn = Instance.new("TextButton")
-                SaveBtn.Size = UDim2.new(1, 0, 0, 24)
-                SaveBtn.Position = UDim2.new(0, 0, 0, 106)
-                SaveBtn.BackgroundColor3 = Theme.Element
-                SaveBtn.Text = "save color"
-                SaveBtn.TextColor3 = Theme.Accent
-                SaveBtn.Font = Theme.Font
-                SaveBtn.TextSize = 11
-                SaveBtn.AutoButtonColor = false
-                SaveBtn.Selectable = false
-                SaveBtn.Parent = PaletteContainer
-                Instance.new("UICorner", SaveBtn).CornerRadius = UDim.new(0, 4)
-                Instance.new("UIStroke", SaveBtn).Color = Theme.Border
-
-                local dropped = false
                 PreviewBtn.MouseButton1Click:Connect(function()
                     dropped = not dropped
                     if dropped then
-                        tempColor = color 
-                        Tween(PreviewBtn, {BackgroundColor3 = tempColor})
-                        Tween(PaletteContainer, {Size = UDim2.new(1, 0, 0, 136)})
-                        Tween(CPFrame, {Size = UDim2.new(1, 0, 0, 166)})
+                        Tween(PaletteContainer, {Size = UDim2.new(1, 0, 0, 110)})
+                        Tween(CPFrame, {Size = UDim2.new(1, 0, 0, 140)})
                     else
-                        Tween(PreviewBtn, {BackgroundColor3 = color})
                         Tween(PaletteContainer, {Size = UDim2.new(1, 0, 0, 0)})
                         Tween(CPFrame, {Size = UDim2.new(1, 0, 0, 30)})
                     end
                 end)
 
-                SaveBtn.MouseButton1Click:Connect(function()
-                    color = tempColor
-                    Plague.Flags[flag] = color
-                    dropped = false
-                    Tween(PaletteContainer, {Size = UDim2.new(1, 0, 0, 0)})
-                    Tween(CPFrame, {Size = UDim2.new(1, 0, 0, 30)})
-                    if callback then task.spawn(callback, color) end
-                end)
-
                 return {
                     Set = function(self, val)
                         color = val
-                        tempColor = val
                         Plague.Flags[flag] = color
                         Tween(PreviewBtn, {BackgroundColor3 = color})
                         if callback then task.spawn(callback, color) end
