@@ -1,43 +1,69 @@
+-- Fetch the Plague Library
 local Plague = loadstring(game:HttpGet("https://raw.githubusercontent.com/d1versity/plague/refs/heads/main/Library.lua"))()
 
+-- Create the Main Window
 local Window = Plague:CreateWindow({
-    Title = "Plague",
-    ConfigFolder = "PlagueConfigs"
+    Title = "plague showcase",
+    ConfigFolder = "plague_configs"
 })
 
-local MainTab = Window:CreateTab("Combat")
+-- Create a Tab
+local MainTab = Window:CreateTab("elements")
 
-local AimbotSec = MainTab:CreateSection("Aimbot Logic", "Left")
-AimbotSec:CreateLabel("Aimbot Status", "Adjust your targeting features.")
+-- Create a Left Section
+local LeftSec = MainTab:CreateSection("basic elements", "Left")
 
-local aimToggle = AimbotSec:CreateToggle("AimEnabled", "Enable Aimbot", false, function(state)
-    print("Aimbot is now:", state)
+-- 1. Label (with optional description)
+LeftSec:CreateLabel("welcome to plague", "this script showcases every ui element.")
+
+-- 2. Toggle
+local exampleToggle = LeftSec:CreateToggle("example_toggle", "example toggle", false, function(state)
+    print("Toggle is now:", state)
 end)
 
-AimbotSec:CreateDropdown("AimPart", "Target Part", {"Head", "Torso", "HumanoidRootPart"}, "Head", function(val)
-    print("Aiming at:", val)
+-- 3. Button
+LeftSec:CreateButton("example button", function()
+    print("Button was clicked!")
 end)
 
-local AdjustSec = MainTab:CreateSection("Adjustments", "Right")
-
-AdjustSec:CreateSlider("AimSmooth", "Smoothness", 0, 10, 5, 2, function(val)
-    print("Smoothness set to:", val)
+-- 4. Slider (Flag, Name, Min, Max, Default, Decimals, Callback)
+LeftSec:CreateSlider("example_slider", "example slider", 0, 100, 50, 1, function(value)
+    print("Slider set to:", value)
 end)
 
-AdjustSec:CreateToggle("SilentAim", "Silent Aim", false)
-
-local VisualsTab = Window:CreateTab("Visuals")
-
-local ESPSec = VisualsTab:CreateSection("ESP Components", "Left")
-ESPSec:CreateToggle("EspBoxes", "Show Boxes", true)
-ESPSec:CreateToggle("EspNames", "Show Names", false)
-
-local MiscSec = VisualsTab:CreateSection("Miscellaneous", "Right")
-MiscSec:CreateButton("Test Notification", function()
-    Plague:Notify("Notification", "The custom UI system is fully operational.", 3)
+-- 5. Color Picker
+LeftSec:CreateColorPicker("example_color", "example color", Color3.fromRGB(155, 95, 135), function(color)
+    print("Color changed to RGB:", color.R * 255, color.G * 255, color.B * 255)
 end)
 
-MiscSec:CreateButton("Force Turn On Aimbot", function()
-    aimToggle:Set(true)
-    Plague:Notify("Updated", "Forced Aimbot Toggle to ON.", 3)
+
+-- Create a Right Section
+local RightSec = MainTab:CreateSection("advanced elements", "Right")
+
+-- 6. Dropdown
+RightSec:CreateDropdown("example_dropdown", "example dropdown", {"option 1", "option 2", "option 3"}, "option 1", function(selected)
+    print("Dropdown selected:", selected)
 end)
+
+-- 7. Keybind
+RightSec:CreateKeybind("example_keybind", "example keybind", Enum.KeyCode.F, function(key)
+    print("Keybind pressed:", key.Name)
+end)
+
+-- 8. Notification Trigger (using a button)
+RightSec:CreateButton("trigger notification", function()
+    Plague:Notify("notification", "this is an example notification triggered by a button.", 3)
+end)
+
+-- Create a Second Tab to demonstrate tab switching
+local VisualsTab = Window:CreateTab("visuals")
+local EspSec = VisualsTab:CreateSection("esp settings", "Left")
+
+EspSec:CreateToggle("esp_enabled", "enable esp", true, function(state)
+    print("ESP Enabled:", state)
+end)
+EspSec:CreateColorPicker("esp_color", "esp color", Color3.fromRGB(255, 80, 80), function(color)
+    print("ESP Color changed.")
+end)
+
+-- Note: The "settings" tab is automatically created and placed at the very end of your tabs.
