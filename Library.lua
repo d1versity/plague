@@ -1,4 +1,4 @@
--- plague by Vhyse | v1.3
+-- plague by Vhyse | v1.4
 
 local Plague = {
     Flags = {},
@@ -758,6 +758,14 @@ function Plague:CreateWindow(config)
                 local key = default or Enum.KeyCode.Unknown
                 Plague.Flags[flag] = key
 
+                local function formatKeyName(k)
+                    if k == Enum.KeyCode.Unknown then return "none" end
+                    if k == Enum.UserInputType.MouseButton1 then return "mb1" end
+                    if k == Enum.UserInputType.MouseButton2 then return "mb2" end
+                    if k == Enum.UserInputType.MouseButton3 then return "mb3" end
+                    return string.lower(k.Name)
+                end
+
                 local BindFrame = Instance.new("Frame")
                 BindFrame.Size = UDim2.new(1, 0, 0, 28)
                 BindFrame.BackgroundTransparency = 1
@@ -781,7 +789,7 @@ function Plague:CreateWindow(config)
                 BindBtn.Position = UDim2.new(1, -70, 0.5, -10)
                 BindBtn.BackgroundColor3 = Theme.Element
                 BindBtn.BorderSizePixel = 0
-                BindBtn.Text = key == Enum.KeyCode.Unknown and "none" or string.lower(key.Name)
+                BindBtn.Text = formatKeyName(key)
                 BindBtn.TextColor3 = Theme.Accent
                 BindBtn.Font = Theme.Font
                 BindBtn.TextSize = 11
@@ -792,10 +800,20 @@ function Plague:CreateWindow(config)
                 Instance.new("UIStroke", BindBtn).Color = Theme.Border
 
                 local binding = false
+
                 BindBtn.MouseButton1Click:Connect(function()
+                    if binding then return end
                     binding = true
                     Plague.IsBinding = true
-                    BindBtn.Text = "..."
+                    
+                    local fadeOut = Tween(BindBtn, {TextTransparency = 1})
+                    task.spawn(function()
+                        fadeOut.Completed:Wait()
+                        if binding then
+                            BindBtn.Text = "..."
+                            Tween(BindBtn, {TextTransparency = 0})
+                        end
+                    end)
                 end)
 
                 table.insert(Plague.Connections, UserInputService.InputBegan:Connect(function(input, gpe)
@@ -803,16 +821,24 @@ function Plague:CreateWindow(config)
                         local newKey
                         if input.UserInputType == Enum.UserInputType.Keyboard then
                             newKey = input.KeyCode
-                        elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.MouseButton2 then
+                        elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.MouseButton2 or input.UserInputType == Enum.UserInputType.MouseButton3 then
                             newKey = input.UserInputType
                         end
 
                         if newKey then
                             key = newKey
                             Plague.Flags[flag] = key
-                            BindBtn.Text = string.lower(key.Name)
                             binding = false
+                            
                             task.delay(0.1, function() Plague.IsBinding = false end)
+                            
+                            local fadeOut = Tween(BindBtn, {TextTransparency = 1})
+                            task.spawn(function()
+                                fadeOut.Completed:Wait()
+                                BindBtn.Text = formatKeyName(key)
+                                Tween(BindBtn, {TextTransparency = 0})
+                            end)
+
                             if callback then task.spawn(callback, key) end
                         end
                     else
@@ -826,7 +852,12 @@ function Plague:CreateWindow(config)
                     Set = function(self, newKey)
                         key = newKey
                         Plague.Flags[flag] = key
-                        BindBtn.Text = key == Enum.KeyCode.Unknown and "none" or string.lower(key.Name)
+                        local fadeOut = Tween(BindBtn, {TextTransparency = 1})
+                        task.spawn(function()
+                            fadeOut.Completed:Wait()
+                            BindBtn.Text = formatKeyName(key)
+                            Tween(BindBtn, {TextTransparency = 0})
+                        end)
                     end
                 }
             end
